@@ -96,12 +96,14 @@ class Adapter {
   }
 
   getFileLocation (config /* : Object */, name /* : string */) /* : string */ {
-    const parts = this.direct(name)
-      ? [this.endPoint, this.bucket(name), this.prefix(name)]
-      : [config.mount, 'files', config.applicationId, encodeURIComponent(name)]
-    return urljoin(...parts)
+    return this.direct(name) ? 
+      urljoin(this.endPoint, this.bucket(name), this.prefix(name)) : 
+      this.minio.presignedGetObject(this.bucket(name),this.prefix(name)).then(
+        (err,presignedUrl) => presignedUrl
+      )
   }
 }
+
 
 module.exports = Adapter
 module.exports.default = Adapter
